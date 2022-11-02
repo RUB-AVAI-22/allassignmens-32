@@ -12,7 +12,7 @@ class CameraNode(Node):
         super().__init__('cam')
         self.publisher = self.create_publisher(Image, 'internalCamStream', 10)
         self.timer = self.create_timer(0, self.video_callback)
-        self.video = cv2.VideoCapture("rtsp://web.nidaku.de:8554/avai")
+        self.video = cv2.VideoCapture(0)
         self.bridge = CvBridge()
 
     def video_callback(self):
