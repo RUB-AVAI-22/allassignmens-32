@@ -51,6 +51,8 @@ class ProcesNode(Node):
         for param in params:
             if param.name == 'PRtoSTORAGE' and param.type_ == Parameter.Type.DOUBLE:
                 self.prs.value = param.value + 0.1
+                self.timer.cancel()
+                self.timer = self.create_timer(self.prs.value, self.publish_callback)
         return SetParametersResult(successful=True)
 
 def main():

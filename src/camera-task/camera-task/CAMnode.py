@@ -40,6 +40,8 @@ class CameraNode(Node):
         for param in params:
             if param.name == 'fps' and param.type_ == Parameter.Type.DOUBLE:
                 self.fps.value = param.value
+                self.timer.cancel()
+                self.timer = self.create_timer(self.fps.value,self.publish_callback)
         return SetParametersResult(successful=True)
 
 
