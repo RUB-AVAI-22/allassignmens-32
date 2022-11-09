@@ -7,10 +7,10 @@
   <maintainer email="chipsliebhaber@gmail.com">ubuntu</maintainer>
   <license>TODO: License declaration</license>
 
-  <exec_depend>rclpy<exec_depend>
-  <exec_depend>sys<exec_depend>
-  <exec_depend>tty<exec_depend>
-  <exec_depend>termios<exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sys</exec_depend>
+  <exec_depend>tty</exec_depend>
+  <exec_depend>termios</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
