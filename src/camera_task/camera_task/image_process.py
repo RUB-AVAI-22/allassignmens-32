@@ -57,7 +57,7 @@ class ImageProcessNode(Node):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(data)
             # modify image
-            self.latest_frame = self.detect_and_draw_boxes(self, cv_image)
+            self.latest_frame = self.detect_and_draw_boxes(cv_image)
         except CvBridgeError as err:
             self.get_logger().info(str(err))
 
