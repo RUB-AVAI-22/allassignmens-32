@@ -25,7 +25,7 @@ class ImageProcessNode(Node):
         self.timer = self.create_timer(self.frequency, self.publish_callback)
         self.bridge = CvBridge()
         self.latest_frame = None
-        self.model_filename = 'best-int8.tflite'
+        self.model_filename = 'best-int8_edgetpu.tflite'
         self.PATH_TO_MODEL = '/home/ubuntu/allassignmens-32/src/camera_task/tflite_models/' + self.model_filename
         self.labels = ["blue", "orange", "yellow"]
         self.interpreter = make_interpreter(self.PATH_TO_MODEL)
