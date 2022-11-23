@@ -62,8 +62,7 @@ class ImageProcessNode(Node):
             self.get_logger().info(str(err))
 
     def detect_and_draw_boxes(self, frame):
-        resized_frame = cv2.resize(frame, (640, 480))
-        _, scale = common.set_resized_input(self.interpreter, (640, 480))
+        _, scale = common.set_resized_input(self.interpreter, (640, 480), lambda size: cv2.resize(frame, (640, 480)))
         self.interpreter.invoke()
         objs = detect.get_objects(self.interpreter, 0.5, scale)
 
