@@ -1,3 +1,17 @@
+# Copyright 2015 Open Source Robotics Foundation, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import sys
 
 import rclpy
@@ -16,7 +30,8 @@ class DisplayNode(Node):
 
     def __init__(self):
         super().__init__('image_display')
-        self.sub_externalCamStream = self.create_subscription(Image, 'externalCamStream', self.callback, 10)
+        self.sub_externalCamStream = self.create_subscription(Image, 'externalCamStream',
+                                                              self.callback, 10)
         self.pub_externalCommandStream = self.create_publisher(String, 'externalCommandStream', 10)
         self.ctr = 0
         cv2.namedWindow("Stream", cv2.WINDOW_NORMAL)
@@ -38,14 +53,16 @@ class DisplayNode(Node):
             if ret == 27:  # esc key
                 cv2.destroyAllWindows()
                 sys.exit(0)
-            cv2.imwrite("images/" + self.startTime + "/" + "frame" + str(self.ctr) + ".jpg", cv_image)
+            cv2.imwrite("images/" + self.startTime + "/" + "frame" + str(self.ctr) + ".jpg",
+                        cv_image)
             self.ctr += 1
         except CvBridgeError as err:
             self.get_logger().info(str(err))
 
     def handle_keyboard(self):
         while True:
-            value = input("Enter command \r\n<float-value>: Change frequency\r\nf: request picture)\r\n")
+            value = input(
+                "Enter command \r\n<float-value>: Change frequency\r\nf: request picture)\r\n")
             msg = String()
             msg.data = str(value)
             self.pub_externalCommandStream.publish(msg)
