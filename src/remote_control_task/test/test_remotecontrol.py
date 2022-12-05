@@ -1,9 +1,11 @@
 import unittest
 from unittest.mock import patch
-import pytest
 import rclpy
 from geometry_msgs.msg import Twist
-from src.remote_control_task.remote_control_task.remote_control import remote_control
+import sys
+import os
+sys.path.append(os.path.dirname(__file__) + "/../remote_control_task")
+from remote_control import remote_control
 
 
 class remote_controlLocalVelocityTest(unittest.TestCase):
@@ -48,7 +50,9 @@ class remote_controlLocalVelocityTest(unittest.TestCase):
 
     def test_localVelocity_emergencyStop(self):
         self.test_localVelocity_forward()
-        self.test_localVelocity_left()
+        with patch.object(self.test_node, 'getKey', return_value="d"):
+            rclpy.spin_once(self.test_node)
+        self.assertEqual(self.test_node.getAngularVelocity(), -0.1)
         self.assertEqual(self.test_node.getLinearVelocity(), 0.01)
 
         with patch.object(self.test_node, 'getKey', return_value="e"):
