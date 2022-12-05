@@ -58,6 +58,8 @@ class ImageProcessNode(Node):
         else:
             try:
                 new_frequency = float(msg.data)
+                if new_frequency < 0:
+                    raise ValueError
                 self.timer.cancel()
                 self.frequency = new_frequency
                 self.timer = self.create_timer(self.frequency, self.publish_callback)
@@ -75,10 +77,21 @@ class ImageProcessNode(Node):
             result.render()
             cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
             # mark image as ready to send
-            self.latest_frame = cv_image
-
+            self.setLatestFrame(cv_image)
         except Exception as err:
             self.get_logger().info(str(err))
+
+    def getFrequency(self):
+        return self.frequency
+
+    def setFrequency(self, value):
+        self.frequency = value
+
+    def getLatestFrame(self):
+        return self.latest_frame
+
+    def setLatestFrame(self, image):
+        self.latest_frame = image
 
 
 def main(args=None):

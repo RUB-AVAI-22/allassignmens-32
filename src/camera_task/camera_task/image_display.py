@@ -1,17 +1,3 @@
-# Copyright 2015 Open Source Robotics Foundation, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import sys
 
 import rclpy
@@ -42,30 +28,41 @@ class DisplayNode(Node):
         self.declare_parameter('window_height', 600)
         self.window_width = self.get_parameter('window_width').value
         self.window_height = self.get_parameter('window_height').value
+        self.enable_controls = True
+        self.last_received_frame = None
 
     def callback(self, data):
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(data)
+            self.last_received_frame = self.bridge.imgmsg_to_cv2(data)
             # self.get_logger().info("Received frame")
-            resized_cv_image = cv2.resize(cv_image, (self.window_width, self.window_height))
+            resized_cv_image = cv2.resize(self.last_received_frame, (self.window_width, self.window_height))
             cv2.imshow("Stream", resized_cv_image)
             ret = cv2.waitKey(10)
             if ret == 27:  # esc key
                 cv2.destroyAllWindows()
                 sys.exit(0)
             cv2.imwrite("images/" + self.startTime + "/" + "frame" + str(self.ctr) + ".jpg",
-                        cv_image)
+                        self.last_received_frame)
             self.ctr += 1
         except CvBridgeError as err:
             self.get_logger().info(str(err))
 
     def handle_keyboard(self):
-        while True:
+        while self.enable_controls:
             value = input(
-                "Enter command \r\n<float-value>: Change frequency\r\nf: request picture)\r\n")
+                "Enter command \r\n<float-value>: Change frequency\r\nf: request picture\r\nx: exit control)\r\n")
+            self.checkExitControls(value)
             msg = String()
             msg.data = str(value)
             self.pub_externalCommandStream.publish(msg)
+
+    def checkExitControls(self, value):
+        if str(value) == 'x':
+            self.enable_controls = False
+            return
+
+    def getLastReceivedFrame(self):
+        return self.last_received_frame
 
 
 def main(args=None):
