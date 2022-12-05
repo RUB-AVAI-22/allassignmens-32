@@ -30,6 +30,8 @@
   <test_depend>sys</test_depend>
   <test_depend>python3-pytest</test_depend>
   <test_depend>pytest-timeout</test_depend>
+  <test_depend>torch</test_depend>
+  <test_depend>yolov5</test_depend>
 
   <export>
     <build_type>ament_python</build_type>
