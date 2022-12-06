@@ -28,6 +28,9 @@ jobs:
         uses: ros-tooling/setup-ros@v0.3
         with:
           required-ros-distributions: foxy
+      - name: Install torch and yolov5
+        run: |
+        sudo pip3 install torch yolov5
       - name: Test demo_package
         uses: ros-tooling/action-ros-ci@v0.2
         with:
