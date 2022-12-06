@@ -33,7 +33,7 @@ class ImageProcessNode(Node):
             self.model = common.DetectMultiBackend(
                 weights=self.PATH_TO_MODEL,
                 data=self.PATH_TO_LABELS)
-        except ValueError:
+        except (ValueError, ModuleNotFoundError):
             self.model = common.DetectMultiBackend(
                 weights=os.path.dirname(__file__) + "/../tflite_models/best-int8.tflite",
                 data=self.PATH_TO_LABELS)
