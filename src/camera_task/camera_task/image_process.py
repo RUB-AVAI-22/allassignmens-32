@@ -9,6 +9,9 @@ import cv2
 from yolov5.models import common
 from yolov5.models.common import AutoShape
 import os
+import importlib
+
+edgetpu_spec = importlib.util.find_spec("tflite_runtime")
 
 
 class ImageProcessNode(Node):
@@ -29,14 +32,8 @@ class ImageProcessNode(Node):
         self.model_filename = 'best-int8_edgetpu.tflite'
         self.PATH_TO_MODEL = os.path.dirname(__file__) + "/../tflite_models" + self.model_filename
         self.PATH_TO_LABELS = os.path.dirname(__file__) + "/../tflite_models/labels.yaml"
-        try:
-            self.model = common.DetectMultiBackend(
-                weights=self.PATH_TO_MODEL,
-                data=self.PATH_TO_LABELS)
-        except (ValueError, ModuleNotFoundError):
-            self.model = common.DetectMultiBackend(
-                weights=os.path.dirname(__file__) + "/../tflite_models/best-int8.tflite",
-                data=self.PATH_TO_LABELS)
+        self.model = None
+        self.setModelEdgeTPU()
         self.model = AutoShape(self.model)
         self.model = self.model.to(torch.device('cpu'))
         self.model.conf = 0.25  # confidence threshold
@@ -93,6 +90,23 @@ class ImageProcessNode(Node):
 
     def setLatestFrame(self, image):
         self.latest_frame = image
+
+    def setModelCPU(self):
+        self.get_logger().info("Did not find Edge TPU, using CPU")
+        self.model = common.DetectMultiBackend(
+            weights=os.path.dirname(__file__) + "/../tflite_models/best-int8.tflite",
+            data=self.PATH_TO_LABELS)
+
+    def setModelEdgeTPU(self):
+        try:
+            if edgetpu_spec is not None:
+                self.model = common.DetectMultiBackend(
+                    weights=self.PATH_TO_MODEL,
+                    data=self.PATH_TO_LABELS)
+            else:
+                self.setModelCPU()
+        except ValueError:
+            self.setModelCPU()
 
 
 def main(args=None):

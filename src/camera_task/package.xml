@@ -16,6 +16,7 @@
   <exec_depend>threading</exec_depend>
   <exec_depend>datetime</exec_depend>
   <exec_depend>pathlib</exec_depend>
+  <exec_depend>importlib</exec_depend>
   <exec_depend>ros2launch</exec_depend>
 
   <test_depend>cv2</test_depend>
@@ -32,6 +33,7 @@
   <test_depend>pytest-timeout</test_depend>
   <test_depend>torch</test_depend>
   <test_depend>yolov5</test_depend>
+  <test_depend>importlib</test_depend>
 
   <export>
     <build_type>ament_python</build_type>
