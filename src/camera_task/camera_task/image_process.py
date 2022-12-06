@@ -8,6 +8,7 @@ from std_msgs.msg import String
 import cv2
 from yolov5.models import common
 from yolov5.models.common import AutoShape
+import os
 
 
 class ImageProcessNode(Node):
@@ -25,16 +26,16 @@ class ImageProcessNode(Node):
         self.bridge = CvBridge()
         self.latest_frame = None
 
-        self.model_filename = 'best-int8.tflite'
-        self.PATH_TO_MODEL = '/home/ubuntu/allassignmens-32/src/camera_task/tflite_models/' + self.model_filename
-        self.PATH_TO_LABELS = '/home/ubuntu/allassignmens-32/src/camera_task/tflite_models/labels.yaml'
+        self.model_filename = 'best-int8_edgetpu.tflite'
+        self.PATH_TO_MODEL = os.path.dirname(__file__) + "/../tflite_models" + self.model_filename
+        self.PATH_TO_LABELS = os.path.dirname(__file__) + "/../tflite_models/labels.yaml"
         try:
             self.model = common.DetectMultiBackend(
                 weights=self.PATH_TO_MODEL,
                 data=self.PATH_TO_LABELS)
         except ValueError:
             self.model = common.DetectMultiBackend(
-                weights='/home/ubuntu/allassignmens-32/src/camera_task/tflite_models/best-int8.tflite',
+                weights=os.path.dirname(__file__) + "/../tflite_models/best-int8.tflite",
                 data=self.PATH_TO_LABELS)
         self.model = AutoShape(self.model)
         self.model = self.model.to(torch.device('cpu'))

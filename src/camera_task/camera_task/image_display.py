@@ -10,6 +10,7 @@ from std_msgs.msg import String
 import threading
 from datetime import datetime
 from pathlib import Path
+import os
 
 
 class DisplayNode(Node):
@@ -23,7 +24,7 @@ class DisplayNode(Node):
         cv2.namedWindow("Stream", cv2.WINDOW_NORMAL)
         self.bridge = CvBridge()
         self.startTime = str(datetime.fromtimestamp(datetime.timestamp(datetime.now())))
-        Path("images/" + self.startTime).mkdir(parents=True, exist_ok=True)
+        Path(os.path.dirname(__file__) + "/images/" + self.startTime).mkdir(exist_ok=True)
         self.declare_parameter('window_width', 800)
         self.declare_parameter('window_height', 600)
         self.window_width = self.get_parameter('window_width').value
