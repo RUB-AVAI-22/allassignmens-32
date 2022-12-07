@@ -27,7 +27,7 @@ class AllNodesTest(unittest.TestCase):
         with patch("cv2.VideoCapture", return_value=cv2.VideoCapture(os.path.dirname(__file__) + "/frame0.jpg")):
             self.cam_node = CameraNode()
         self.input_img = cv2.imread(os.path.dirname(__file__) + "/frame0.jpg")
-        self.process_node = ImageProcessNode()
+        self.process_node = ImageProcessNode(False, False)
         with patch("cv2.namedWindow", return_value=None):
             with patch("pathlib.Path.mkdir", return_value=None):
                 self.display_node = DisplayNode()

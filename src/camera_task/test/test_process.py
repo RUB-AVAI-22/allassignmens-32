@@ -25,7 +25,7 @@ class ImageProcessNodeCommandTest(unittest.TestCase):
         rclpy.shutdown()
 
     def setUp(self):
-        self.test_node = ImageProcessNode()
+        self.test_node = ImageProcessNode(False, False)
         self.pub_node = rclpy.create_node('pub_process')
         self.sub_node = rclpy.create_node('sub_process')
         self.pub = self.pub_node.create_publisher(

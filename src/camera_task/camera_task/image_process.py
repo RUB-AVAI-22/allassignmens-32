@@ -9,14 +9,11 @@ import cv2
 from yolov5.models import common
 from yolov5.models.common import AutoShape
 import os
-import importlib
-
-edgetpu_spec = importlib.util.find_spec("tflite_runtime")
 
 
 class ImageProcessNode(Node):
 
-    def __init__(self):
+    def __init__(self, useEdgeTPU, useConeDetection):
         super().__init__('image_process')
         self.declare_parameter('frequency', 2)
         self.frequency = self.get_parameter('frequency').value
@@ -33,13 +30,17 @@ class ImageProcessNode(Node):
         self.PATH_TO_MODEL = os.path.dirname(__file__) + "/../tflite_models" + self.model_filename
         self.PATH_TO_LABELS = os.path.dirname(__file__) + "/../tflite_models/labels.yaml"
         self.model = None
-        self.setModelEdgeTPU()
-        self.model = AutoShape(self.model)
-        self.model = self.model.to(torch.device('cpu'))
-        self.model.conf = 0.25  # confidence threshold
-        self.model.iou = 0.45  # NMS IoU threshold
-        self.model.agnostic = False  # NMS class-agnostic
-        self.model.multi_label = False  # NMS multiple labels per element
+        if useConeDetection:
+            if useEdgeTPU:
+                self.setModelEdgeTPU()
+            else:
+                self.setModelCPU()
+            self.model = AutoShape(self.model)
+            self.model = self.model.to(torch.device('cpu'))
+            self.model.conf = 0.25  # confidence threshold
+            self.model.iou = 0.45  # NMS IoU threshold
+            self.model.agnostic = False  # NMS class-agnostic
+            self.model.multi_label = False  # NMS multiple labels per element
 
     def publish_callback(self):
         try:
@@ -69,11 +70,12 @@ class ImageProcessNode(Node):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(data)
             # modify image
-            cv_image = cv2.resize(cv_image, (640, 640))
-            cv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2BGR)
-            result = self.model(cv_image, augment=True)
-            result.render()
-            cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+            if self.model is not None:
+                cv_image = cv2.resize(cv_image, (640, 640))
+                cv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2BGR)
+                result = self.model(cv_image, augment=True)
+                result.render()
+                cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
             # mark image as ready to send
             self.setLatestFrame(cv_image)
         except Exception as err:
@@ -99,12 +101,9 @@ class ImageProcessNode(Node):
 
     def setModelEdgeTPU(self):
         try:
-            if edgetpu_spec is not None:
-                self.model = common.DetectMultiBackend(
+            self.model = common.DetectMultiBackend(
                     weights=self.PATH_TO_MODEL,
                     data=self.PATH_TO_LABELS)
-            else:
-                self.setModelCPU()
         except ValueError:
             self.setModelCPU()
 
