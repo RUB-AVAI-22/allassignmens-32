@@ -27,8 +27,8 @@ class ImageProcessNode(Node):
         self.latest_frame = None
 
         self.model_filename = 'best-int8_edgetpu.tflite'
-        self.PATH_TO_MODEL = os.path.dirname(__file__) + "/../tflite_models" + self.model_filename
-        self.PATH_TO_LABELS = os.path.dirname(__file__) + "/../tflite_models/labels.yaml"
+        self.PATH_TO_MODEL = "/home/ubuntu/allassignmens-32/src/camera_task/tflite_models" + self.model_filename
+        self.PATH_TO_LABELS = "/home/ubuntu/allassignmens-32/src/camera_task/tflite_models/labels.yaml"
         self.model = None
         if useConeDetection:
             if useEdgeTPU:
@@ -96,7 +96,7 @@ class ImageProcessNode(Node):
     def setModelCPU(self):
         self.get_logger().info("Did not find Edge TPU, using CPU")
         self.model = common.DetectMultiBackend(
-            weights=os.path.dirname(__file__) + "/../tflite_models/best-int8.tflite",
+            weights="/home/ubuntu/allassignmens-32/src/camera_task/tflite_models/best-int8.tflite",
             data=self.PATH_TO_LABELS)
 
     def setModelEdgeTPU(self):
