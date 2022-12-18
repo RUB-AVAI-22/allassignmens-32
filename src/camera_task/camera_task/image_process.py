@@ -3,8 +3,8 @@ import torch
 from rclpy.node import Node
 
 from cv_bridge import CvBridge, CvBridgeError
-from sensor_msgs.msg import Image
-from std_msgs.msg import String
+from sensor_msgs.msg import Image  # , LaserScan
+from std_msgs.msg import String, Float32MultiArray
 import cv2
 from yolov5.models import common
 from yolov5.models.common import AutoShape
@@ -22,12 +22,13 @@ class ImageProcessNode(Node):
         self.sub_externalCommandStream = self.create_subscription(String, 'externalCommandStream',
                                                                   self.command_callback, 10)
         self.pub_externalCamStream = self.create_publisher(Image, 'externalCamStream', 10)
+        self.pub_coneAssignment = self.create_publisher(Float32MultiArray, 'coneAssignment', 10)
         self.timer = self.create_timer(self.frequency, self.publish_callback)
         self.bridge = CvBridge()
         self.latest_frame = None
 
         self.model_filename = 'best-int8_edgetpu.tflite'
-        self.PATH_TO_MODEL = "/home/ubuntu/allassignmens-32/src/camera_task/tflite_models" + self.model_filename
+        self.PATH_TO_MODEL = "/home/ubuntu/allassignmens-32/src/camera_task/tflite_models/" + self.model_filename
         self.PATH_TO_LABELS = "/home/ubuntu/allassignmens-32/src/camera_task/tflite_models/labels.yaml"
         self.model = None
         if useConeDetection:
@@ -74,12 +75,23 @@ class ImageProcessNode(Node):
                 cv_image = cv2.resize(cv_image, (640, 640))
                 cv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2BGR)
                 result = self.model(cv_image, augment=True)
+                self.assignCones(result)
                 result.render()
                 cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
             # mark image as ready to send
             self.setLatestFrame(cv_image)
         except Exception as err:
             self.get_logger().info(str(err))
+
+    def assignCones(self, prediction):
+        boundingBoxes = prediction.xyxy
+        detections = Float32MultiArray()
+        for tensor in boundingBoxes:
+            for cone in tensor:
+                detections.data.append(cone[0])  # left bottom x-coordinate of bBox
+                detections.data.append(cone[2])  # right upper x-coordinate of bBox
+                detections.data.append(cone[5])  # color (0=blue, 1=orange, 2=yellow)
+        self.pub_coneAssignment.publish(detections)
 
     def getFrequency(self):
         return self.frequency
@@ -102,8 +114,8 @@ class ImageProcessNode(Node):
     def setModelEdgeTPU(self):
         try:
             self.model = common.DetectMultiBackend(
-                    weights=self.PATH_TO_MODEL,
-                    data=self.PATH_TO_LABELS)
+                weights=self.PATH_TO_MODEL,
+                data=self.PATH_TO_LABELS)
         except ValueError:
             self.setModelCPU()
 

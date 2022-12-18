@@ -24,7 +24,7 @@ class DisplayNode(Node):
         cv2.namedWindow("Stream", cv2.WINDOW_NORMAL)
         self.bridge = CvBridge()
         self.startTime = str(datetime.fromtimestamp(datetime.timestamp(datetime.now())))
-        Path("images/" + self.startTime).mkdir(exist_ok=True)
+        Path("images/" + self.startTime).mkdir(exist_ok=True, parents=True)
         self.declare_parameter('window_width', 800)
         self.declare_parameter('window_height', 600)
         self.window_width = self.get_parameter('window_width').value
