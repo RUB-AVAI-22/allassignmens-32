@@ -89,7 +89,10 @@ class ImageProcessNode(Node):
         for tensor in boundingBoxes:
             for cone in tensor:
                 detections.data.append(cone[0])  # left bottom x-coordinate of bBox
+                detections.data.append(cone[1])  # y1
                 detections.data.append(cone[2])  # right upper x-coordinate of bBox
+                detections.data.append(cone[3])  # y2
+                detections.data.append(cone[4])  # confidence
                 detections.data.append(cone[5])  # color (0=blue, 1=orange, 2=yellow)
         self.pub_coneAssignment.publish(detections)
 
