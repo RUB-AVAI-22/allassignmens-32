@@ -8,7 +8,6 @@ from std_msgs.msg import String, Float32MultiArray
 import cv2
 from yolov5.models import common
 from yolov5.models.common import AutoShape
-import os
 
 
 class ImageProcessNode(Node):

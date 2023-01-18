@@ -14,6 +14,7 @@ from std_msgs.msg import String
 from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import LaserScan
 import math
+from rclpy.qos import qos_profile_sensor_data
 
 
 class Worker(QRunnable):
@@ -33,7 +34,7 @@ class LidarPrinter(Node):
         super().__init__('lidar_subscriber')
         self.create_subscription(Float64MultiArray, 'lid_print', self.listener_test_callback, 10)
         self.create_subscription(Float64MultiArray, 'cone_print', self.listener_cone_callback, 10)
-        self.create_subscription(LaserScan, 'scan', self.listener_callback, 10)
+        self.create_subscription(LaserScan, 'scan', self.listener_callback, qos_profile=qos_profile_sensor_data)
         self.interface = None
 
     def listener_test_callback(self, msg):
@@ -65,7 +66,7 @@ class LidarPrinter(Node):
 
 
 class LidarCanvas(FigureCanvasQTAgg):
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
+    def __init__(self, parent=None, width=200, height=160, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(projection='polar')
         self.axes.set_theta_zero_location('W', offset=90)
@@ -87,7 +88,7 @@ class Main(QWidget):
 
         # Create the maptlotlib FigureCanvas object,
         # which defines a single set of axes as self.axes.
-        self.lidar_canvas = LidarCanvas(self, width=5, height=4, dpi=100)
+        self.lidar_canvas = LidarCanvas(self, width=200, height=160, dpi=100)
         self.xdata = [(angle_min + angle_inc * i) for i in range(0, 360)]
         self.ydata = [0]*360
 
@@ -141,7 +142,7 @@ class Main(QWidget):
             angle[x] = angle[x] / 360 * 2 * math.pi
 
         if self._plot_cone_refs[cone] is None:
-            plot_refs = self.lidar_canvas.axes.plot(angle, distance, 'o', c=color, ms=3)
+            plot_refs = self.lidar_canvas.axes.plot(angle, distance, 'o', c=color, ms=8)
             self._plot_cone_refs[cone] = plot_refs[0]
         else:
             self._plot_cone_refs[cone].set_xdata(angle)

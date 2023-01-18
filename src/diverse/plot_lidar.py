@@ -29,7 +29,7 @@ def plot(ranges, angle_min=0.0, angle_inc=1):
 
 def r1():
     plt.subplot(111, polar=True)
-    plt.show()
+    plt.scatter()
 
 
 rclpy.init()

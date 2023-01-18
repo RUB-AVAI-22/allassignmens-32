@@ -35,29 +35,32 @@ class remote_control(Node):
         self.timer = self.create_timer(0, self.callback)
 
     def callback(self):
-        key = self.getKey()
-        twist = Twist()
-        if key == 'w':
-            self.linearVelocity += self.linearVelocityChangeValue
-        if key == 's':
-            self.linearVelocity -= self.linearVelocityChangeValue
-        if key == 'a':
-            self.angularVelocity += self.angularVelocityChangeValue
-        if key == 'd':
-            self.angularVelocity -= self.angularVelocityChangeValue
-        if key == 'e':
-            self.linearVelocity = 0.0
-            self.angularVelocity = 0.0
+        try:
+            key = self.getKey()
+            twist = Twist()
+            if key == 'w':
+                self.linearVelocity += self.linearVelocityChangeValue
+            if key == 's':
+                self.linearVelocity -= self.linearVelocityChangeValue
+            if key == 'a':
+                self.angularVelocity += self.angularVelocityChangeValue
+            if key == 'd':
+                self.angularVelocity -= self.angularVelocityChangeValue
+            if key == 'e':
+                self.linearVelocity = 0.0
+                self.angularVelocity = 0.0
 
-        twist.linear.x = self.linearVelocity
-        twist.linear.y = 0.0
-        twist.linear.z = 0.0
-        twist.angular.x = 0.0
-        twist.angular.y = 0.0
-        twist.angular.z = self.angularVelocity
-        self.get_logger().info(
-            f'linearVelocity = {self.linearVelocity}, angularVelocity = {self.angularVelocity}')
-        self.publisher.publish(twist)
+            twist.linear.x = self.linearVelocity
+            twist.linear.y = 0.0
+            twist.linear.z = 0.0
+            twist.angular.x = 0.0
+            twist.angular.y = 0.0
+            twist.angular.z = self.angularVelocity
+            self.get_logger().info(
+                f'linearVelocity = {self.linearVelocity}, angularVelocity = {self.angularVelocity}')
+            self.publisher.publish(twist)
+        except Exception as error:
+            self.get_logger().info(error)
 
     def getKey(self):
         settings = termios.tcgetattr(sys.stdin)
@@ -65,7 +68,7 @@ class remote_control(Node):
         x = 0
         while x == 0:
             x = sys.stdin.read(1)[0]
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.settings)
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
         return x
 
     def getLinearVelocity(self):
