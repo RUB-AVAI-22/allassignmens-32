@@ -40,14 +40,15 @@ class ConeAssignment(Node):
     def callback(self, detections):
         bBox_coordinates = detections.data.tolist()
         bBox_list = self.extract_bounding_ranges(bBox_coordinates)  # x1, y1, x2, y2, conf, label
-        try:
-            if self.latest_lidar_info is not None and bBox_coordinates is not None:
-                self.assign_cones(bBox_list)
-                self.draw_map()
-        except Exception as err:
-            self.get_logger().info(str(err))
+        #try:
+        if self.latest_lidar_info is not None and bBox_coordinates is not None:
+            self.assign_cones(bBox_list)
+            self.draw_map()
+        #except Exception as err:
+        #    self.get_logger().info(str(err))
 
     def assign_cones(self, detections):
+        print(0)
         cones = []
         for cone in detections:
             bBox_start, bBox_end = self.calculate_lidar_range(cone)
@@ -56,7 +57,7 @@ class ConeAssignment(Node):
             bBox_start += 3.5  # add offset
             bBox_end += 3.5
 
-            cone_distances = self.latest_lidar_info[bBox_start + shift:bBox_end - shift]
+            cone_distances = self.latest_lidar_info[round(bBox_start + shift):round(bBox_end - shift)]
             cone_distances = list(
                 filter(lambda i: 0 < i < 2.5, cone_distances))  # we filter out ranges above 2.5m and of 0m/infinite
             if len(cone_distances) < 2:
@@ -82,9 +83,13 @@ class ConeAssignment(Node):
         #  draw robot
         x_coordinates.append(self.bot_x)
         y_coordinates.append(self.bot_y)
+        conf.append(1.0)
+        colors.append('black')
 
         #  draw cones
         for cone in self.assigned_cones:
+            x_coordinates.append(cone[0])
+            y_coordinates.append(cone[1])
             conf.append(cone[4])
             if cone[5] == 0:
                 colors.append('blue')
@@ -126,8 +131,8 @@ class ConeAssignment(Node):
     # if not, the new cone gets added to the list
     # here: cone[6] specifies how often a cone got updated, to calculate the average
     def update_coordinates(self, cone_list, new_cone, leeway):
-        if len(self.assigned_cones) > 1:
-            for cone in self.assigned_cones[1:]:
+        if len(self.assigned_cones) > 0:
+            for cone in self.assigned_cones:
                 if abs(cone[0] - new_cone[0]) < leeway and abs(cone[1] - new_cone[1]) < leeway:
                     cone[0] = (cone[0] * cone[6] + new_cone[0]) / (cone[6] + 1)
                     cone[1] = (cone[1] * cone[6] + new_cone[1]) / (cone[6] + 1)
