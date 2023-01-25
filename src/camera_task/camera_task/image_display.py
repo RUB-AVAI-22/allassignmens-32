@@ -35,7 +35,6 @@ class DisplayNode(Node):
     def callback(self, data):
         try:
             self.last_received_frame = self.bridge.imgmsg_to_cv2(data)
-            # self.get_logger().info("Received frame")
             resized_cv_image = cv2.resize(self.last_received_frame, (self.window_width, self.window_height))
             cv2.imshow("Stream", resized_cv_image)
             ret = cv2.waitKey(10)
