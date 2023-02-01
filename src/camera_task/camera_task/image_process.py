@@ -14,7 +14,7 @@ class ImageProcessNode(Node):
 
     def __init__(self, useEdgeTPU, useConeDetection):
         super().__init__('image_process')
-        self.declare_parameter('frequency', 2)
+        self.declare_parameter('frequency', 0.01)
         self.frequency = self.get_parameter('frequency').value
         self.sub_internalCamStream = self.create_subscription(Image, 'internalCamStream',
                                                               self.callback, 10)
@@ -75,7 +75,7 @@ class ImageProcessNode(Node):
                 cv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2BGR)
                 result = self.model(cv_image, augment=True)
                 self.assignCones(result)
-                result.render()
+                #result.render()
                 cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
             # mark image as ready to send
             self.setLatestFrame(cv_image)
@@ -125,7 +125,7 @@ class ImageProcessNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    node = ImageProcessNode(True, True)
+    node = ImageProcessNode(False, False)
     rclpy.spin(node)
 
     node.destroy_node()
