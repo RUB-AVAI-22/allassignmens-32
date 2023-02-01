@@ -125,7 +125,7 @@ class ImageProcessNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    node = ImageProcessNode(False, False)
+    node = ImageProcessNode(True, True)
     rclpy.spin(node)
 
     node.destroy_node()
