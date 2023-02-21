@@ -133,7 +133,7 @@ class ConeAssignment(Node):
     def update_coordinates(self, cone_list, new_cone, leeway):
         if len(self.assigned_cones) > 0:
             for cone in self.assigned_cones:
-                if abs(cone[0] - new_cone[0]) < leeway and abs(cone[1] - new_cone[1]) < leeway:
+                if abs(cone[0] - new_cone[0]) < leeway and abs(cone[1] - new_cone[1]) < leeway and cone[5] == new_cone[5]:
                     cone[0] = (cone[0] * cone[6] + new_cone[0]) / (cone[6] + 1)
                     cone[1] = (cone[1] * cone[6] + new_cone[1]) / (cone[6] + 1)
                     cone[6] += 1
