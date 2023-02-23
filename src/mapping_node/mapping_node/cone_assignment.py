@@ -52,12 +52,12 @@ class ConeAssignment(Node):
         cones = []
         for cone in detections:
             bBox_start, bBox_end = self.calculate_lidar_range(cone)
-            difference = bBox_end - bBox_start
+            difference = -(bBox_end - bBox_start)
             shift = round(difference / 6)  # shift because of tensor
-            bBox_start += 3.5  # add offset
-            bBox_end += 3.5
+            bBox_start *= 0.7  # add offset
+            bBox_end *= 0.7
 
-            cone_distances = self.latest_lidar_info[round(bBox_start + shift):round(bBox_end - shift)]
+            cone_distances = self.latest_lidar_info[round(bBox_end - shift):round(bBox_start + shift)]
             cone_distances = list(
                 filter(lambda i: 0 < i < 2.5, cone_distances))  # we filter out ranges above 2.5m and of 0m/infinite
             if len(cone_distances) < 2:
@@ -66,7 +66,7 @@ class ConeAssignment(Node):
                 distance = np.median(cone_distances)
                 angle = ((bBox_start + bBox_end) / 2.0) - 180
                 print(f'Detected - Angle: {angle}, Distance: {distance}, Confidence: {cone[4]}, Color: {cone[5]}')
-                x, y = self.get_map_coords(self.bot_x, self.bot_y, self.bot_angle, angle, distance)
+                x, y = self.get_map_coords(self.bot_x, self.bot_y, self.bot_angle, angle, distance) # angle minus to fix mirroring
                 potential_new_cone = [x, y, angle, distance, cone[4], cone[5], 0]  # x, y, angle, distance,
                 # conf, color, times_updated
                 self.update_coordinates(self.assigned_cones, potential_new_cone, 0.3)
@@ -105,14 +105,14 @@ class ConeAssignment(Node):
     def get_map_coords(self, x, y, direction, angle, distance):
         direction = np.degrees(direction)
         angle -= direction
-        return (x + (np.cos(np.radians(angle)) * distance)), (y + (np.sin(np.radians(angle)) * distance))
+        return (x + (np.cos(np.radians(angle)) * distance)), (y + (np.sin(-np.radians(angle)) * distance))
 
     def calculate_lidar_range(self, cone):
         fov = 62.2  # fov of camera
-        left = 180 - (fov / 2)
+        left_border = 180 + (fov / 2)
         pixels = 640
-        start = left + cone[0] * fov / pixels
-        end = left + cone[2] * fov / pixels
+        start = left_border - cone[0] * fov / pixels
+        end = left_border - cone[2] * fov / pixels
 
         return start, end
 

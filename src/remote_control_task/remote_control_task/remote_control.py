@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import sys
-import termios
-import tty
+#import termios
+import pygame
+#import tty
 
 import rclpy
 from geometry_msgs.msg import Twist
@@ -35,40 +36,45 @@ class remote_control(Node):
         self.timer = self.create_timer(0, self.callback)
 
     def callback(self):
-        try:
-            key = self.getKey()
-            twist = Twist()
-            if key == 'w':
-                self.linearVelocity += self.linearVelocityChangeValue
-            if key == 's':
-                self.linearVelocity -= self.linearVelocityChangeValue
-            if key == 'a':
-                self.angularVelocity += self.angularVelocityChangeValue
-            if key == 'd':
-                self.angularVelocity -= self.angularVelocityChangeValue
-            if key == 'e':
-                self.linearVelocity = 0.0
-                self.angularVelocity = 0.0
+            #while 1:
+            try:
+                #key = self.getKey()
+                for event in pygame.event.get():
+                    twist = Twist()
+                    if event.type == pygame.KEYDOWN:
+                        print(event.key)
+                        if event.unicode == 'w':
+                            self.linearVelocity += self.linearVelocityChangeValue
+                        if event.unicode == 's':
+                            self.linearVelocity -= self.linearVelocityChangeValue
+                        if event.unicode == 'a':
+                            self.angularVelocity += self.angularVelocityChangeValue
+                        if event.unicode == 'd':
+                            self.angularVelocity -= self.angularVelocityChangeValue
+                        if event.unicode == 'e':
+                            self.linearVelocity = 0.0
+                            self.angularVelocity = 0.0
 
-            twist.linear.x = self.linearVelocity
-            twist.linear.y = 0.0
-            twist.linear.z = 0.0
-            twist.angular.x = 0.0
-            twist.angular.y = 0.0
-            twist.angular.z = self.angularVelocity
-            self.get_logger().info(
-                f'linearVelocity = {self.linearVelocity}, angularVelocity = {self.angularVelocity}')
-            self.publisher.publish(twist)
-        except Exception as error:
-            self.get_logger().info(error)
+                        twist.linear.x = self.linearVelocity
+                        twist.linear.y = 0.0
+                        twist.linear.z = 0.0
+                        twist.angular.x = 0.0
+                        twist.angular.y = 0.0
+                        twist.angular.z = self.angularVelocity
+                        self.get_logger().info(
+                            f'linearVelocity = {self.linearVelocity}, angularVelocity = {self.angularVelocity}')
+                        self.publisher.publish(twist)
+            except Exception as error:
+                self.get_logger().info(error)
 
     def getKey(self):
-        settings = termios.tcgetattr(sys.stdin)
+        '''settings = termios.tcgetattr(sys.stdin)
         tty.setcbreak(sys.stdin)
         x = 0
         while x == 0:
             x = sys.stdin.read(1)[0]
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)'''
+
         return x
 
     def getLinearVelocity(self):
@@ -85,6 +91,10 @@ class remote_control(Node):
 
 
 def main(args=None):
+    pygame.init()
+    screen = pygame.display.set_mode((640, 480))
+    pygame.display.set_caption('Pygame Keyboard Test')
+
     rclpy.init(args=args)
     pub = remote_control()
     rclpy.spin(pub)
